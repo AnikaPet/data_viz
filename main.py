@@ -59,11 +59,11 @@ def padavine(data_set):
     plt.plot(broj_lokaliteta)
 
     plt.subplots_adjust(bottom=0.234,left=0.134)
-    plt.grid(True,color='grey')
+    plt.grid(True)
 
     plt.xticks(rotation=90)
     plt.xlabel('vrste')
-    plt.ylabel('procenat lokaliteta %')
+    plt.ylabel('procenat lokaliteta (%)')
 
     plt.show()
 
@@ -121,13 +121,50 @@ def temperatura(data_set):
     plt.show()
 
 def azot(data_set):
-    '''ne znam jos sta ce biti'''
+    '''koje vrste uspijevaju iskljucivo na lokalitetima sa najvisim nivoima azota'''
 
-    return data_set
+    granica = data_set.azot.quantile(.75)
+    vrste_azot = data_set.loc[data_set['azot']<=granica]
 
-def ph_vrednost(data_set):
-    '''ne znam jos sta ce biti'''
+    val = np.intersect1d(data_set.vrsta,vrste_azot.vrsta)
+    temp = data_set[data_set.vrsta.isin(val)]
+    ukupan_broj_lokaliteta = temp.groupby('vrsta').count()
+    broj_lokaliteta = (vrste_azot.groupby('vrsta').count())/ukupan_broj_lokaliteta*100
 
-    return data_set
+    plt.figure(figsize=[10,6])
+    plt.title('Lokaliteti sa kolicinom azota >= %i' %granica)
+    plt.plot(broj_lokaliteta)
 
-fosfor(df)
+    # y ce biti 100 onoliko puta koliko ima el u x
+    x = broj_lokaliteta.loc[broj_lokaliteta['azot']==100]
+    x = list(x.index)
+    y = np.ones(len(x))*100
+    plt.scatter(x,y,marker='o')
+
+    plt.subplots_adjust(bottom=0.234,left=0.134)
+    plt.grid(True)
+
+    plt.xticks(rotation=90)
+    plt.xlabel('vrste')
+    plt.ylabel('procenat lokaliteta (%)')
+
+    plt.show()
+
+def ph_fja(ph_vr):
+    if(ph_vr<4.5): return 'veoma kisela'
+    elif(ph_vr<=5.5): return 'kisela'
+    elif(ph_vr<=6.7): return 'umjereno kisela'
+    elif(ph_vr<=7.2): return 'neutralna'
+    else: return 'alkalna'
+
+def ph_vrijednost(data_set):
+    '''Ako znamo da su prema ph vrijednosti zemljista 
+    poredjana u sledece kategorije koje vrste dominantno 
+    uspijevaju u kojim kategorijama?'''
+
+    ph_grupa = data_set[['vrsta','ph_vrijednost']]
+    # axis = 1 indicating that applicating is done at a row level
+    ph_grupa['naziv_grupe'] = ph_grupa.apply(lambda row:ph_fja(row.ph_vrijednost),axis=1)
+    print(ph_grupa.head())
+
+ph_vrijednost(df)
