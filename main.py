@@ -177,7 +177,7 @@ def ph_vrijednost(data_set):
 
     # dobijamo grupa - vrsta i njen procenat za grupu
     result = grouped/grouped.groupby(level=0).sum()*100
-    # temp.index je niz torki (grupa,vrsta)
+    # grouped.index je niz torki (grupa,vrsta)
 
     result.unstack().plot.bar(stacked = True,figsize = (10,6))
 
@@ -194,4 +194,33 @@ def ph_vrijednost(data_set):
 
     plt.show()
 
-ph_vrijednost(df)
+def vlaznost(data_set):
+    '''za svaku vrstu izanalizirati nivo vlaznosti zemljista na kojima uspijeva'''
+
+    vlaznost_vrsta = data_set[['vlaznost','vrsta']].groupby('vrsta')
+
+    vlaznost_vrsta.boxplot(figsize=(10,6),subplots=False)
+
+    vlaznost_vrsta = vlaznost_vrsta.mean()
+    print(vlaznost_vrsta.head())
+
+    # moramo malo pomjeriti zbog boxplot-a
+    plt.plot(range(1,len(vlaznost_vrsta)+1),vlaznost_vrsta.vlaznost,color='r',linewidth=0.8,label='mean')
+
+    plt.subplots_adjust(bottom=0.293,right=0.915)
+    plt.grid(True)
+    plt.title('Vlaznost i vrsta')
+
+    xticklabels = vlaznost_vrsta.index
+    plt.xticks(range(1,len(xticklabels)+1),labels=xticklabels, rotation=90)
+
+    plt.xlabel('vrsta')
+    plt.ylabel('vlaznost')
+
+    plt.legend()
+    plt.show()
+
+
+    return data_set
+
+vlaznost(df)
