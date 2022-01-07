@@ -160,11 +160,38 @@ def ph_fja(ph_vr):
 def ph_vrijednost(data_set):
     '''Ako znamo da su prema ph vrijednosti zemljista 
     poredjana u sledece kategorije koje vrste dominantno 
-    uspijevaju u kojim kategorijama?'''
+    uspijevaju u kojim kategorijama?
+    pH < 4.5 veoma kisela zemljišta 
+    pH od 4.5 do 5.5 kisela zemljišta 
+    pH od 5.6 do 6.7 umereno kisela zemljišta 
+    pH od 6.8 do 7.2 neutralna zemljišta 
+    pH > 7.2 alkalna (bazična ili bazna) zemljišta 
+    '''
 
-    ph_grupa = data_set[['vrsta','ph_vrijednost']]
+    # using .copy() to avoid (force copy) SettingWithCopyWarning caused by chaining assignement
+    ph_grupa = data_set[['vrsta','ph_vrijednost']].copy()
     # axis = 1 indicating that applicating is done at a row level
-    ph_grupa['naziv_grupe'] = ph_grupa.apply(lambda row:ph_fja(row.ph_vrijednost),axis=1)
-    print(ph_grupa.head())
+    ph_grupa.loc[:,'naziv_grupe'] = ph_grupa.apply(lambda row:ph_fja(row.ph_vrijednost),axis=1)
+
+    grouped = ph_grupa.groupby(['naziv_grupe','vrsta']).count().rename(columns={'ph_vrijednost':'broj'})
+
+    # dobijamo grupa - vrsta i njen procenat za grupu
+    result = grouped/grouped.groupby(level=0).sum()*100
+    # temp.index je niz torki (grupa,vrsta)
+
+    result.unstack().plot.bar(stacked = True,figsize = (10,6))
+
+    plt.title('Lokaliteti i pH grupe')
+
+    plt.subplots_adjust(bottom=0.228)
+    plt.grid(True)
+
+    plt.xticks(rotation=30)
+    plt.xlabel('grupe')
+    plt.ylabel('procenat (%)')
+
+    plt.legend(labels=grouped.index.get_level_values(1).unique(),prop={'size': 8})
+
+    plt.show()
 
 ph_vrijednost(df)
