@@ -184,12 +184,40 @@ def ph_vrijednost(data_set):
     result = grouped/grouped.groupby(level=0).sum()*100
     # grouped.index je niz torki (grupa,vrsta)
 
-    result.unstack().plot.bar(stacked = True,figsize = (10,6))
+    #colors = plt.cm.tab20c(np.linspace(0,1,22))
+
+    #lista boja generisana pomocu https://medialab.github.io/iwanthue/
+
+    colors = ["#d58840",
+            "#5f36b7",
+            "#79d645",
+            "#c44bca",
+            "#d0cd3c",
+            "#6b67c2",
+            "#63d689",
+            "#c74381",
+            "#4c7e34",
+            "#cc91cf",
+            "#c2d07c",
+            "#482752",
+            "#79ceb6",
+            "#d6483b",
+            "#95c3d9",
+            "#7b312e",
+            "#6380ac",
+            "#887035",
+            "#bc7a83",
+            "#39362a",
+            "#d4bda3",
+            "#527664"]
+
+    #edgecolor='black'
+    result.unstack().plot.bar(stacked = True,figsize = (10,6),color=colors)
 
     plt.title('Lokaliteti i pH grupe')
 
     plt.subplots_adjust(bottom=0.228)
-    plt.grid(True)
+    #plt.grid(True)
 
     plt.xticks(rotation=30)
     plt.xlabel('grupe')
@@ -227,5 +255,3 @@ def vlaznost(data_set):
     plt.show()
 
 ph_vrijednost(df)
-vlaznost(df)
-
