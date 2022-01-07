@@ -56,7 +56,7 @@ def padavine(data_set):
 
     plt.figure(figsize=[10,6])
     plt.title('Lokaliteti sa kolicinom padavina <= %i' %granica)
-    plt.plot(broj_lokaliteta)
+    plt.plot(broj_lokaliteta,color='C0')
 
     plt.subplots_adjust(bottom=0.234,left=0.134)
     plt.grid(True)
@@ -65,7 +65,8 @@ def padavine(data_set):
     plt.xlabel('vrste')
     plt.ylabel('procenat lokaliteta (%)')
 
-    plt.show()
+    plt.savefig('padavine')
+    plt.show() 
 
 def fosfor(data_set):
     '''
@@ -79,7 +80,7 @@ def fosfor(data_set):
     fosfor_vrsta = data_set[['fosfor','vrsta']].groupby('vrsta').mean()
 
     plt.figure(figsize=[10,6])
-    plt.plot(fosfor_vrsta)
+    plt.plot(fosfor_vrsta,color='C0')
     line1 = plt.axhline(y=min_fosfor, color='g', linestyle='--', linewidth=1)
     line2 = plt.axhline(y=max_fosfor, color='r', linestyle='--', linewidth=1)
 
@@ -91,7 +92,9 @@ def fosfor(data_set):
     plt.ylabel('kolicina fosfora')
 
     plt.legend([line1,line2],['Q1','Q3'])
+    plt.savefig('fosfor.png')
     plt.show()
+
 
 def temperatura(data_set):
     '''
@@ -106,7 +109,7 @@ def temperatura(data_set):
     temperatura_vrsta = data_set[['temp','vrsta']].groupby('vrsta').mean()
 
     plt.figure(figsize=[10,6])
-    plt.plot(temperatura_vrsta)
+    plt.plot(temperatura_vrsta,color='C0')
     line1 = plt.axhline(y=min_temp, color='g', linestyle='--', linewidth=1)
     line2 = plt.axhline(y=max_temp, color='r', linestyle='--', linewidth=1)
 
@@ -118,6 +121,7 @@ def temperatura(data_set):
     plt.ylabel('prosjecna temperatura')
 
     plt.legend([line1,line2],['Q1','Q3'])
+    plt.savefig('temperatura')
     plt.show()
 
 def azot(data_set):
@@ -133,13 +137,13 @@ def azot(data_set):
 
     plt.figure(figsize=[10,6])
     plt.title('Lokaliteti sa kolicinom azota >= %i' %granica)
-    plt.plot(broj_lokaliteta)
+    plt.plot(broj_lokaliteta,color='C0',linewidth=1.0)
 
     # y ce biti 100 onoliko puta koliko ima el u x
     x = broj_lokaliteta.loc[broj_lokaliteta['azot']==100]
     x = list(x.index)
     y = np.ones(len(x))*100
-    plt.scatter(x,y,marker='o')
+    plt.scatter(x,y,marker='o',color='r')
 
     plt.subplots_adjust(bottom=0.234,left=0.134)
     plt.grid(True)
@@ -148,6 +152,7 @@ def azot(data_set):
     plt.xlabel('vrste')
     plt.ylabel('procenat lokaliteta (%)')
 
+    plt.savefig('azot')
     plt.show()
 
 def ph_fja(ph_vr):
@@ -192,6 +197,7 @@ def ph_vrijednost(data_set):
 
     plt.legend(labels=grouped.index.get_level_values(1).unique(),prop={'size': 8})
 
+    plt.savefig('ph.png')
     plt.show()
 
 def vlaznost(data_set):
@@ -202,7 +208,6 @@ def vlaznost(data_set):
     vlaznost_vrsta.boxplot(figsize=(10,6),subplots=False)
 
     vlaznost_vrsta = vlaznost_vrsta.mean()
-    print(vlaznost_vrsta.head())
 
     # moramo malo pomjeriti zbog boxplot-a
     plt.plot(range(1,len(vlaznost_vrsta)+1),vlaznost_vrsta.vlaznost,color='r',linewidth=0.8,label='mean')
@@ -218,9 +223,9 @@ def vlaznost(data_set):
     plt.ylabel('vlaznost')
 
     plt.legend()
+    plt.savefig('vlaznost')
     plt.show()
 
-
-    return data_set
-
+ph_vrijednost(df)
 vlaznost(df)
+
