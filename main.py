@@ -50,13 +50,15 @@ def padavine(data_set):
     vrste_padavine = data_set.loc[data_set['padavine']<=granica]
 
     val = np.intersect1d(data_set.vrsta,vrste_padavine.vrsta)
-    temp = data_set[data_set.vrsta.isin(val)]
-    ukupan_broj_lokaliteta = temp.groupby('vrsta').count()
-    broj_lokaliteta = (vrste_padavine.groupby('vrsta').count())/ukupan_broj_lokaliteta*100
+    temp = data_set[data_set.vrsta.isin(val)]   # izdvajamo redove za vrste koje se nalaze u vrste padavina
+    ukupan_broj_lokaliteta = temp.groupby('vrsta').count() # racunamo ukupan broj lokaliteta na kojima vrste uspijevaju
+    broj_lokaliteta = (vrste_padavine.groupby('vrsta').count())/ukupan_broj_lokaliteta*100 
+    
+    # procenat lokaliteta sa malim brojem padavina u odnosu na ukupan broj lokaliteta za svaku vrstu
 
     plt.figure(figsize=[10,6])
     plt.title('Lokaliteti sa kolicinom padavina <= %i' %granica)
-    plt.plot(broj_lokaliteta,color='C0')
+    plt.plot(broj_lokaliteta.padavine,color='C0')
 
     plt.subplots_adjust(bottom=0.234,left=0.134)
     plt.grid(True)
@@ -254,4 +256,4 @@ def vlaznost(data_set):
     plt.savefig('vlaznost')
     plt.show()
 
-ph_vrijednost(df)
+padavine(df)
