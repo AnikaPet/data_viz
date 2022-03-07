@@ -4,191 +4,163 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-#ucitati data set
-df = pd.read_csv('preporuke_d.csv')
-#print(df.head())
-
-# ignorisati redove sa nedostajucim podacima
-# primjetimo da su nedostajuce kolone prazne
-# prvo zamijenimo prazne stringove sa NaN
-# onda koristimo fju pandas.DataFrame.dropna()
-# koja ignorise redova u kojima se nalaze NA vrijednosti
-# inplace = True omogucava da se df objekat izmijeni i sacuvaju se te izmjene u istom objektu
-# Modify the existing DataFrame and return None when inplace=True
-
-nan_value = float('NaN')
-df.replace("", nan_value, inplace=True)
-df.dropna(inplace=True)
-
-#print(df.describe())  # dobijamo statistike
-
-# mozda iskoristiti 25th percentile i 75th percentile vrijednosti
-# za padavine/fosfor/temperature
-# i onda uzeti u obzir samo te lokalitete
-# i povezati sa vrstama
-
-# 75th percentile - 25% svih vrijednosti je iznad ovog broja
-# 25th percentile - 25% svih vrijednosti je ispod ovog broja
-
-
-# intersect1d
-# find the intersection of two arrays. (array like elements)
-# Return the sorted, unique values that are in both of the input arrays.
-
-
-def padavine(data_set):
+def precipitation(data_set):
     '''
-    naci lokalitete sa malim brojem padavina
-    naci koje vrste tu uspijevaju
-    i generisati dijagram
-
-    Koji je procenat lokaliteta sa malom kolicinom padavina za svaku vrstu?
+    Find locations with small amount of precipitation(column 'padavine' in data set).
+    Diagram shows percentage of locations with small amount of precipitation in relation to
+    total number of locations for each species(column 'vrsta' in data set).
     '''
+    bound = data_set['padavine'].quantile(.25)
+    species_precipitation = data_set.loc[data_set['padavine']<=bound]
 
-    granica = data_set['padavine'].quantile(.25)
-
-    vrste_padavine = data_set.loc[data_set['padavine']<=granica]
-
-    val = np.intersect1d(data_set.vrsta,vrste_padavine.vrsta)
-    temp = data_set[data_set.vrsta.isin(val)]   # izdvajamo redove za vrste koje se nalaze u vrste padavina
-    ukupan_broj_lokaliteta = temp.groupby('vrsta').count() # racunamo ukupan broj lokaliteta na kojima vrste uspijevaju
-    broj_lokaliteta = (vrste_padavine.groupby('vrsta').count())/ukupan_broj_lokaliteta*100 
-    
-    # procenat lokaliteta sa malim brojem padavina u odnosu na ukupan broj lokaliteta za svaku vrstu
+    # Return the sorted, unique values that are in both of the input arrays.
+    val = np.intersect1d(data_set.vrsta,species_precipitation.vrsta)
+    temp = data_set[data_set.vrsta.isin(val)]
+    total_no_locations = temp.groupby('vrsta').count()
+    no_locations = (species_precipitation.groupby('vrsta').count())/total_no_locations*100
 
     plt.figure(figsize=[10,6])
-    plt.title('Lokaliteti sa kolicinom padavina <= %i' %granica)
-    plt.plot(broj_lokaliteta.padavine,color='C0')
+    plt.title(f'Locations with amount of precipitation <= {bound:.2f}')
+    plt.plot(no_locations.padavine,color='C0')
 
     plt.subplots_adjust(bottom=0.234,left=0.134)
     plt.grid(True)
 
     plt.xticks(rotation=90)
-    plt.xlabel('vrste')
-    plt.ylabel('procenat lokaliteta (%)')
+    plt.xlabel('species')
+    plt.ylabel('percentage of locations (%)')
 
-    plt.savefig('padavine')
-    plt.show() 
+    plt.savefig('precipitation')
+    plt.show()
 
-def fosfor(data_set):
+def phosphorus(data_set):
     '''
-    kako su povezani nivo fosfora i vrste
-    generisati dijagram
+    Diagram shows relation between soil phosphorus(column 'fosfor' in data set)
+    levels and species(column 'vrsta' in data set) that thrive on those locations.
     '''
 
-    min_fosfor = data_set['fosfor'].quantile(.25)
-    max_fosfor = data_set['fosfor'].quantile(.75)
+    min_phosphorus = data_set['fosfor'].quantile(.25)
+    max_phosphorus = data_set['fosfor'].quantile(.75)
 
-    fosfor_vrsta = data_set[['fosfor','vrsta']].groupby('vrsta').mean()
+    phosphorus_species = data_set[['fosfor','vrsta']].groupby('vrsta').mean()
 
     plt.figure(figsize=[10,6])
-    plt.plot(fosfor_vrsta,color='C0')
-    line1 = plt.axhline(y=min_fosfor, color='g', linestyle='--', linewidth=1)
-    line2 = plt.axhline(y=max_fosfor, color='r', linestyle='--', linewidth=1)
+    plt.plot(phosphorus_species,color='C0')
+    line1 = plt.axhline(y=min_phosphorus, color='g', linestyle='--', linewidth=1)
+    line2 = plt.axhline(y=max_phosphorus, color='r', linestyle='--', linewidth=1)
 
     plt.subplots_adjust(bottom=0.22)
     plt.grid(True)
-    plt.title('Kolicina fosfora i vrste')
+    plt.title('Amount of phosphorus and species')
     plt.xticks(rotation=90)
-    plt.xlabel('vrste')
-    plt.ylabel('kolicina fosfora')
+    plt.xlabel('species')
+    plt.ylabel('phosphorus')
 
     plt.legend([line1,line2],['Q1','Q3'])
-    plt.savefig('fosfor.png')
+    plt.savefig('phosphorus')
     plt.show()
 
 
-def temperatura(data_set):
+def temperature(data_set):
     '''
-    najnize temperature - koje vrste uspijevaju
-    najvise temperature - koje vrste uspijevaju
-    generisati dijagram
+    Diagram shows relation between temperature(column 'temperatura' in data set)
+    levels and species(column 'vrsta' in data set) that thrive on those locations.
     '''
 
-    min_temp = data_set['temp'].quantile(.25)
-    max_temp = data_set['temp'].quantile(.75)
+    min_temperature = data_set['temp'].quantile(.25)
+    max_temperature = data_set['temp'].quantile(.75)
 
-    temperatura_vrsta = data_set[['temp','vrsta']].groupby('vrsta').mean()
+    temperature_species = data_set[['temp','vrsta']].groupby('vrsta').mean()
 
     plt.figure(figsize=[10,6])
-    plt.plot(temperatura_vrsta,color='C0')
-    line1 = plt.axhline(y=min_temp, color='g', linestyle='--', linewidth=1)
-    line2 = plt.axhline(y=max_temp, color='r', linestyle='--', linewidth=1)
+    plt.plot(temperature_species,color='C0')
+    line1 = plt.axhline(y=min_temperature, color='g', linestyle='--', linewidth=1)
+    line2 = plt.axhline(y=max_temperature, color='r', linestyle='--', linewidth=1)
 
     plt.subplots_adjust(bottom=0.293,right=0.915)
     plt.grid(True)
-    plt.title('Temperatura i vrsta')
+    plt.title('Temperature and species')
     plt.xticks(rotation=90)
-    plt.xlabel('vrsta')
-    plt.ylabel('prosjecna temperatura')
+    plt.xlabel('species')
+    plt.ylabel('average temperature')
 
     plt.legend([line1,line2],['Q1','Q3'])
-    plt.savefig('temperatura')
+    plt.savefig('temperature')
     plt.show()
 
-def azot(data_set):
-    '''koje vrste uspijevaju iskljucivo na lokalitetima sa najvisim nivoima azota'''
+def nitrogen(data_set):
+    '''
+    Find locations with high levels of nitrogen(column 'azot' in data set).
+    Diagram shows percentage of locations with high levels of nitrogen in relation to
+    number of locations where each species(column 'vrsta' in data set) thrive.
+    Additionally, marked species are those that thrive exclusively on locations with high
+    nitrogen levels.
+    '''
 
-    granica = data_set.azot.quantile(.75)
-    vrste_azot = data_set.loc[data_set['azot']<=granica]
+    bound = data_set.azot.quantile(.75)
+    species_nitrogen = data_set.loc[data_set['azot']<=bound]
 
-    val = np.intersect1d(data_set.vrsta,vrste_azot.vrsta)
+    val = np.intersect1d(data_set.vrsta,species_nitrogen.vrsta)
     temp = data_set[data_set.vrsta.isin(val)]
-    ukupan_broj_lokaliteta = temp.groupby('vrsta').count()
-    broj_lokaliteta = (vrste_azot.groupby('vrsta').count())/ukupan_broj_lokaliteta*100
+    total_no_locations = temp.groupby('vrsta').count()
+    no_locations = (species_nitrogen.groupby('vrsta').count())/total_no_locations*100
 
     plt.figure(figsize=[10,6])
-    plt.title('Lokaliteti sa kolicinom azota >= %i' %granica)
-    plt.plot(broj_lokaliteta,color='C0',linewidth=1.0)
+    plt.title(f'Locations with amount of nitrogen >= {bound:.2f}')
+    plt.plot(no_locations,color='C0',linewidth=1.0)
 
-    # y ce biti 100 onoliko puta koliko ima el u x
-    x = broj_lokaliteta.loc[broj_lokaliteta['azot']==100]
-    x = list(x.index)
-    y = np.ones(len(x))*100
-    plt.scatter(x,y,marker='o',color='r')
+    # Add scatter plot for species thriving only on locations with high soil nitrogen levels.
+    x_axis = no_locations.loc[no_locations['azot']==100]
+    x_axis = list(x_axis.index)
+    y_axis = np.ones(len(x_axis))*100
+    plt.scatter(x_axis,y_axis,marker='o',color='r')
 
     plt.subplots_adjust(bottom=0.234,left=0.134)
     plt.grid(True)
 
     plt.xticks(rotation=90)
-    plt.xlabel('vrste')
-    plt.ylabel('procenat lokaliteta (%)')
+    plt.xlabel('species')
+    plt.ylabel('percentage of locations (%)')
 
-    plt.savefig('azot')
+    plt.savefig('nitrogen')
     plt.show()
 
-def ph_fja(ph_vr):
-    if(ph_vr<4.5): return 'veoma kisela'
-    elif(ph_vr<=5.5): return 'kisela'
-    elif(ph_vr<=6.7): return 'umjereno kisela'
-    elif(ph_vr<=7.2): return 'neutralna'
-    else: return 'alkalna'
+def ph_function(ph_value):
+    '''Helper function.'''
 
-def ph_vrijednost(data_set):
-    '''Ako znamo da su prema ph vrijednosti zemljista 
-    poredjana u sledece kategorije koje vrste dominantno 
-    uspijevaju u kojim kategorijama?
-    pH < 4.5 veoma kisela zemljišta 
-    pH od 4.5 do 5.5 kisela zemljišta 
-    pH od 5.6 do 6.7 umereno kisela zemljišta 
-    pH od 6.8 do 7.2 neutralna zemljišta 
-    pH > 7.2 alkalna (bazična ili bazna) zemljišta 
+    if ph_value<4.5:
+        return 'very strongly acid'
+    elif ph_value<=5.5:
+        return 'acid'
+    elif ph_value<=6.7:
+        return 'moderate acid'
+    elif ph_value<=7.2:
+        return 'neutral'
+    else:
+        return 'base'
+
+def ph_values(data_set):
+    '''
+    If we know that all locations fall into one of five ph groups(categories), which species
+    thrive in wich categories?
+    Diagram shows species that thrive on locations in each ph group by percentage.
+    pH < 4.5 very strongly acid
+    pH od 4.5 do 5.5 acid
+    pH od 5.6 do 6.7 moderate acid
+    pH od 6.8 do 7.2 neutral
+    pH > 7.2 base
     '''
 
     # using .copy() to avoid (force copy) SettingWithCopyWarning caused by chaining assignement
-    ph_grupa = data_set[['vrsta','ph_vrijednost']].copy()
+    ph_group = data_set[['vrsta','ph_vrijednost']].copy()
     # axis = 1 indicating that applicating is done at a row level
-    ph_grupa.loc[:,'naziv_grupe'] = ph_grupa.apply(lambda row:ph_fja(row.ph_vrijednost),axis=1)
+    ph_group.loc[:,'naziv_grupe'] = ph_group.apply(lambda row:ph_function(row.ph_vrijednost),axis=1)
 
-    grouped = ph_grupa.groupby(['naziv_grupe','vrsta']).count().rename(columns={'ph_vrijednost':'broj'})
-
-    # dobijamo grupa - vrsta i njen procenat za grupu
+    grouped = ph_group.groupby(['naziv_grupe','vrsta']).count().rename(columns={'ph_vrijednost':'broj'})
     result = grouped/grouped.groupby(level=0).sum()*100
-    # grouped.index je niz torki (grupa,vrsta)
 
     #colors = plt.cm.tab20c(np.linspace(0,1,22))
-
-    #lista boja generisana pomocu https://medialab.github.io/iwanthue/
+    #lists of colors generated by https://medialab.github.io/iwanthue/
 
     colors = ["#d58840",
             "#5f36b7",
@@ -213,47 +185,56 @@ def ph_vrijednost(data_set):
             "#d4bda3",
             "#527664"]
 
-    #edgecolor='black'
     result.unstack().plot.bar(stacked = True,figsize = (10,6),color=colors)
 
-    plt.title('Lokaliteti i pH grupe')
-
+    plt.title('Locations and ph groups')
     plt.subplots_adjust(bottom=0.228)
-    #plt.grid(True)
 
     plt.xticks(rotation=30)
-    plt.xlabel('grupe')
-    plt.ylabel('procenat (%)')
+    plt.xlabel('groups')
+    plt.ylabel('percentage (%)')
 
     plt.legend(labels=grouped.index.get_level_values(1).unique(),prop={'size': 8})
 
     plt.savefig('ph.png')
     plt.show()
 
-def vlaznost(data_set):
-    '''za svaku vrstu izanalizirati nivo vlaznosti zemljista na kojima uspijeva'''
+def humidity(data_set):
+    '''
+    Analysis of humidity levels of localities where certain species thrive.
+    '''
 
-    vlaznost_vrsta = data_set[['vlaznost','vrsta']].groupby('vrsta')
+    humidity_species = data_set[['vlaznost','vrsta']].groupby('vrsta')
+    humidity_species.boxplot(figsize=(10,6),subplots=False)
+    humidity_species = humidity_species.mean()
 
-    vlaznost_vrsta.boxplot(figsize=(10,6),subplots=False)
-
-    vlaznost_vrsta = vlaznost_vrsta.mean()
-
-    # moramo malo pomjeriti zbog boxplot-a
-    plt.plot(range(1,len(vlaznost_vrsta)+1),vlaznost_vrsta.vlaznost,color='r',linewidth=0.8,label='mean')
+    # Shift axis because of boxplot
+    plt.plot(range(1,len(humidity_species)+1),humidity_species.vlaznost,color='r',linewidth=0.8,label='mean')
 
     plt.subplots_adjust(bottom=0.293,right=0.915)
     plt.grid(True)
-    plt.title('Vlaznost i vrsta')
+    plt.title('Humidity and species')
 
-    xticklabels = vlaznost_vrsta.index
+    xticklabels = humidity_species.index
     plt.xticks(range(1,len(xticklabels)+1),labels=xticklabels, rotation=90)
 
-    plt.xlabel('vrsta')
-    plt.ylabel('vlaznost')
+    plt.xlabel('species')
+    plt.ylabel('humidity')
 
     plt.legend()
-    plt.savefig('vlaznost')
+    plt.savefig('humidity')
     plt.show()
 
-padavine(df)
+df = pd.read_csv('preporuke_d.csv')
+
+'''
+Notice that missing data are empty strings. To ignore rows with missing data,
+we have to replace empty
+strings with NaN. To modify the existing DataFrame and return None we use inplace=True.
+'''
+
+nan_value = float('NaN')
+df.replace("", nan_value, inplace=True)
+df.dropna(inplace=True)
+
+ph_values(df)
