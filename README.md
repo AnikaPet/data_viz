@@ -1,11 +1,11 @@
 # data_viz
 
-Rad sa velikim skupom podataka
+Working with large data sets.
 ***
-Koristimo dataset preporuka o poljoprivrednim vrstama (preporuke\_d.csv). Svaki red ima 8 kolona. 
-Prvih 7 kolona su mjerenja koja su dobijena analizom lokaliteta (zemljište, vazduh i klima) a posljednja (osma)
-kolona predstavlja vrstu koja je zasađena na analiziranom lokalitetu.
-Cilj je odgovoriti na pitanja o dataset-u i odgovore potkrijepiti dijagramima.
-Korišćene su biblioteke: numpy, pandas i matplotlib.
+Dataset about agricultural species (preporuke\_d.csv).
+Each row has 8 columns.
+The first 7 columns are measurements obtained by site analysis (soil, air and climate) and the last (eighth)
+the column represents the species planted at the analyzed site.
+The aim is to answer the questions about the dataset and support the answers with diagrams.
+Used libraries: Numpy, Pandas and Matplotlib.
 ***
-Fajl report.pdf predstavlja detaljan izvještaj o rješenju zadatka.
